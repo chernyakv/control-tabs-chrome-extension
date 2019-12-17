@@ -1,46 +1,71 @@
-chrome.runtime.onStartup.addListener(onStartupHandler);
-chrome.tabs.onCreated.addListener(onCreatedHandler);
-chrome.tabs.onRemoved.addListener(onRemovedHandler);
-chrome.storage.onChanged.addListener(getNumberOfOpenTabs);
-
+var checkedUrlList = [
+    'https://vk.com/',
+    'https://twitter.com/'
+];
 var maxNumberOfOpenTabs = 6;
+var numberOfOpenTabs = 1;
+var parentTabsMap = [];
 
-function onStartupHandler() {
-    chrome.storage.sync.get('tasksLimit', function(items) {        
-        if(items.tasksLimit) {
-            maxNumberOfOpenTabs = parseInt(items.tasksLimit);        
-        } else {
-            chrome.storage.sync.set({'tasksLimit': maxNumberOfOpenTabs})
-        }        
-    })          
-}
-
-function onCreatedHandler(tab){   
-    console.log(maxNumberOfOpenTabs);
-    chrome.tabs.query({ currentWindow: true }, removeExtraTabs(tab.id));
-    if(!tab.openerTabId) {
-        chrome.tabs.move(tab.id, {windowId: null, index: 0});
+function deleteIfLimitIsExceeded(newTabId) {
+    if (numberOfOpenTabs >= maxNumberOfOpenTabs) {
+        chrome.tabs.remove(newTabId);
+        alert(`Max number of tabs - ${maxNumberOfOpenTabs}`);
     }
 }
 
-function removeExtraTabs(newTabId) {
-    return tabs => {
-        if(tabs.length > maxNumberOfOpenTabs) {
-            chrome.tabs.remove(newTabId);
-            alert(`Max number of tabs - ${maxNumberOfOpenTabs}`);            
+function updateNumberOfOpenTabs() {
+    chrome.tabs.query({ currentWindow: true }, function(tabs) {
+        numberOfOpenTabs = tabs.length;        
+    });
+}
+
+function updateMaxNubmerOfOpenTabs() {
+    chrome.storage.sync.get('maxNumberOfOpenTabs', function(items) {
+        if (items.maxNumberOfOpenTabs) {
+            maxNumberOfOpenTabs = parseInt(items.maxNumberOfOpenTabs);
+        } else {
+            chrome.storage.sync.set({ 'maxNumberOfOpenTabs': maxNumberOfOpenTabs })
         }
-    }    
+    })
 }
 
-function onRemovedHandler(tabId) {
-    //console.log('Removed tab - ' + tabId);
+function onStartupHandler() {
+    updateMaxNubmerOfOpenTabs();
 }
 
-function getNumberOfOpenTabs() {
-    chrome.storage.sync.get(null, function(items){
-        maxNumberOfOpenTabs = parseInt(items.tasksLimit);
+function onStorageChangedHandler() {
+    updateMaxNubmerOfOpenTabs();
+}
+
+function onTabCreatedHandler(tab) {
+    updateNumberOfOpenTabs();
+    if (checkedUrlList.indexOf(tab.pendingUrl) !== -1) {
+        parentTabsMap.push({ id: tab.id, openerTabId: tab.openerTabId });
+    }
+    deleteIfLimitIsExceeded(tab.id);
+    if (!tab.openerTabId) {
+        chrome.tabs.move(tab.id, { windowId: null, index: 0 });
+    }
+}
+
+function onTabRemovedHandler(removedTabId) {
+    updateNumberOfOpenTabs();
+    parentTabsMap.filter(tab => tab.id != removedTabId);
+    parentTabsMap.forEach(tab => {
+        if (tab.openerTabId == removedTabId) {
+            chrome.tabs.remove(tab.id);
+        }
     })    
 }
+
+function init() {
+    chrome.runtime.onStartup.addListener(onStartupHandler);
+    chrome.tabs.onCreated.addListener(onTabCreatedHandler);
+    chrome.tabs.onRemoved.addListener(onTabRemovedHandler);
+    chrome.storage.onChanged.addListener(onStorageChangedHandler);
+}
+
+init();
 
 
 
