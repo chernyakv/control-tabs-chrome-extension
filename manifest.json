@@ -17,6 +17,7 @@
     "permissions": [
         "tabs",
         "power",
-        "storage"
+        "storage",
+        "webNavigation"
     ]
 }
