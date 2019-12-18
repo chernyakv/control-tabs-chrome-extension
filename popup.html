@@ -11,18 +11,33 @@
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="js/jquery-3.4.1.min.js"></script>
     <script src="js/popup.js"></script>
-    <link rel="stylesheet" href="css/master.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 
 <body>
     <div class="popup-wrapper">
-        <div class="input-group input-group-sm mb-1">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroup-sizing-sm">Max number of open tabs</span>
+        <div class="max-number-input-wrapper">
+            <div class="input-group input-group-sm mb-1">          
+                <input type="text" class="form-control" placeholder="Enter max number of tabs..." id="tabsCount" aria-label="Sizing example input"
+                    aria-describedby="inputGroup-sizing-sm">
             </div>
-            <input type="text" class="form-control" id="tabsCount" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
-          </div>
-        <button type="submit" id="countSave" class="btn btn-primary btn-sm pb-1 pt-1"><span>Save</span></button>
+            <button type="button" id="countSave" class="btn btn-primary btn-sm pb-1 pt-1"><span>Save</span></button>
+        </div>   
+        
+        <div class="urls-list-wrapper">
+            <div class="input-group input-group-sm mb-1">               
+                <input type="text" class="form-control" placeholder="Enter URL..." id="urlInput" aria-label="Sizing example input"
+                    aria-describedby="inputGroup-sizing-sm">
+            </div>
+            <button type="button" id="urlAddButton" class="btn btn-primary btn-sm pb-1 pt-1"><span>Add</span></button>
+
+            <ul class="list-group list-group-flush">
+                <div id="urlsList" class="class">
+                    <div></div>
+                </div>               
+            </ul>
+        </div>
     </div>
 </body>
+
 </html>

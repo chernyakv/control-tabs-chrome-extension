@@ -1,9 +1,4 @@
-var filter = {
-    url: [
-        { urlEquals: 'https://vk.com/' },
-        { urlEquals: 'https://twitter.com/' }
-    ]
-}
+var checkedUrlList = [];
 var maxNumberOfOpenTabs = 6;
 var numberOfOpenTabs = 1;
 var parentTabsMap = {};
@@ -15,11 +10,11 @@ function deleteIfLimitIsExceeded(newTabId) {
     updateBadgeText();
 }
 
-function updateNumberOfOpenTabs() {    
+function updateNumberOfOpenTabs() {
     chrome.tabs.query({ currentWindow: true }, function (tabs) {
         numberOfOpenTabs = tabs.length;
         updateBadgeText();
-    });    
+    });
 }
 
 function updateMaxNubmerOfOpenTabs() {
@@ -32,12 +27,23 @@ function updateMaxNubmerOfOpenTabs() {
     })
 }
 
-function updateBadgeText() {    
+function updateBadgeText() {
     chrome.browserAction.setBadgeText({
         text: "" + numberOfOpenTabs
     });
     const color = numberOfOpenTabs == maxNumberOfOpenTabs ? "red" : "green";
-    chrome.browserAction.setBadgeBackgroundColor({ color });    
+    chrome.browserAction.setBadgeBackgroundColor({ color });
+}
+
+function updateChekedUrlsList() {
+    checkedUrlList = [];
+    chrome.storage.sync.get('checkedUrlList', function (items) {
+        if (items.checkedUrlList) {
+            items.checkedUrlList.forEach(url => {
+                checkedUrlList.push(url);
+            });
+        }
+    })
 }
 
 function onStartupHandler() {
@@ -46,10 +52,10 @@ function onStartupHandler() {
 
 function onStorageChangedHandler() {
     updateMaxNubmerOfOpenTabs();
+    updateChekedUrlsList();
 }
 
 function onTabCreatedHandler(tab) {
-    console.log(tab);
     updateNumberOfOpenTabs();
     deleteIfLimitIsExceeded(tab.id);
     if (!tab.openerTabId) {
@@ -67,32 +73,30 @@ function onTabRemovedHandler(removedTabId) {
 }
 
 function onCreatedNavigationTargetHandler(details) {
-    const deps = parentTabsMap[details.sourceTabId];
-    if (deps) {
-        chrome.tabs.update(deps.childTabId, { url: details.url }, function (tab) {
-            if (chrome.runtime.lastError) {
-                console.log('Error:', chrome.runtime.lastError.message);
-            }
-        });
-        chrome.tabs.remove(details.tabId);
-    } else {
-        parentTabsMap[details.sourceTabId] = { childTabId: details.tabId };
+    console.log(details.url);
+    if (checkedUrlList.indexOf(details.url) !== -1) {
+        const deps = parentTabsMap[details.sourceTabId];
+        if (deps) {
+            chrome.tabs.update(deps.childTabId, { url: details.url }, function (tab) {
+                if (chrome.runtime.lastError) {
+                    console.log('Error:', chrome.runtime.lastError.message);
+                }
+            });
+            chrome.tabs.remove(details.tabId);
+        } else {
+            parentTabsMap[details.sourceTabId] = { childTabId: details.tabId };
+        }
     }
 }
 
 function init() {
     updateNumberOfOpenTabs();
+    updateChekedUrlsList();
     chrome.runtime.onStartup.addListener(onStartupHandler);
     chrome.tabs.onCreated.addListener(onTabCreatedHandler);
     chrome.tabs.onRemoved.addListener(onTabRemovedHandler);
     chrome.storage.onChanged.addListener(onStorageChangedHandler);
-    chrome.webNavigation.onCreatedNavigationTarget.addListener(onCreatedNavigationTargetHandler, filter);
+    chrome.webNavigation.onCreatedNavigationTarget.addListener(onCreatedNavigationTargetHandler);
 }
 
 init();
-
-
-
-
-
-

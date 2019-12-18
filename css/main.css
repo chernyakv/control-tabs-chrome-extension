@@ -1,3 +1,8 @@
 .popup-wrapper {
-    width: 200px;
+    width: 500px;
+    padding: 10px;
+}
+
+.urls-list-wrapper {
+    margin-top: 5px;
 }
