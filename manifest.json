@@ -1,7 +1,7 @@
 {
     "name": "Tabs conrol extension",
     "version": "1.0",
-    "description": "Build an Extension!",
+    "description": "Tabs conrol extension",
     "manifest_version": 2,
     "background": {
         "scripts": [

@@ -59,6 +59,12 @@ function Rule(data) {
 
   window.onload = function() {
     loadURLs();
+    chrome.storage.sync.get('maxNumberOfOpenTabs', function (items) {
+        if (items.maxNumberOfOpenTabs) {
+            document.getElementById('max-number-input').value = items.maxNumberOfOpenTabs;
+        }
+    }) 
+   
     document.getElementById('new').onclick = function() {
       new Rule();
     };
