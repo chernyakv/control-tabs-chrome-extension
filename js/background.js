@@ -18,7 +18,6 @@ function deleteIfLimitIsExceeded(newTabId) {
 function checkWithCkechedList(navigationUrl) {
   var result = false;
   for (let item of checkedUrlList) {
-    console.log(item);
     if (new RegExp(item, "i").test(navigationUrl)) {
       result = true;
       break;
@@ -62,7 +61,12 @@ function onStorageChangedHandler(changes, namespace) {
   for (key in changes) {
     newValue = changes[key].newValue;
     if (key === "checkedUrlList") {
-      checkedUrlList = newValue;
+      checkedUrlList = [];
+      newValue.forEach(item => {
+        if (item.enabled) {
+          checkedUrlList.push(item.url);
+        }
+      });
     } else if (key === "maxNumberOfOpenTabs") {
       maxNumberOfOpenTabs = newValue;
       updateBadgeText();
