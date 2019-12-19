@@ -17,6 +17,7 @@
         "default_popup": "popup.html",
         "default_title": "Chrome Ext"
     },  
+    "options_page": "popup.html",
     "permissions": [
         "tabs",
         "power",

@@ -7,35 +7,39 @@
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Selecter</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <script src="js/jquery-3.4.1.min.js"></script>
     <script src="js/popup.js"></script>
     <link rel="stylesheet" href="css/main.css">
 </head>
 
 <body>
     <div class="popup-wrapper">
-        <div class="max-number-input-wrapper">
-            <div class="input-group input-group-sm mb-1">          
-                <input type="text" class="form-control" placeholder="Enter max number of tabs..." id="tabsCount" aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm">
+        <div class="max-count-wrapper">
+            <div class="table-title">
+                <span>Max number of open tabs:</span>
+            </div>          
+            <input id="max-number-input" type="text" class="max-number">
+            <button id="save">Save</button>           
+        </div>
+        <div class="urls-wrapper">
+            <div class="table-title">
+                <span>Checked URLs:</span>
             </div>
-            <button type="button" id="countSave" class="btn btn-primary btn-sm pb-1 pt-1"><span>Save</span></button>
-        </div>   
-        
-        <div class="urls-list-wrapper">
-            <div class="input-group input-group-sm mb-1">               
-                <input type="text" class="form-control" placeholder="Enter URL..." id="urlInput" aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm">
-            </div>
-            <button type="button" id="urlAddButton" class="btn btn-primary btn-sm pb-1 pt-1"><span>Add</span></button>
-
-            <ul class="list-group list-group-flush">
-                <div id="urlsList" class="class">
-                    <div></div>
-                </div>               
-            </ul>
+            <table id="rules" class="urls-table"></table>
+            <button id="new">New URL</button>
+            <table hidden>
+                <tr id="rule-template" hidden>
+                    <td>
+                        <input type="text" class="url-param">
+                    </td>
+                    <td>
+                        <span class=nowrap>
+                            <input type="checkbox" class="enabled checked">
+                            <label class="enabled-label">Enabled</label>
+                        </span>
+                        <button class="remove">Remove</button>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>

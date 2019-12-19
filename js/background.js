@@ -10,7 +10,7 @@ function deleteIfLimitIsExceeded(newTabId) {
     updateBadgeText();
 }
 
-function updateNumberOfOpenTabs() {
+function updateNumberOfOpenTabs() {    
     chrome.tabs.query({ currentWindow: true }, function (tabs) {
         numberOfOpenTabs = tabs.length;
         updateBadgeText();
@@ -39,23 +39,35 @@ function updateChekedUrlsList() {
     checkedUrlList = [];
     chrome.storage.sync.get('checkedUrlList', function (items) {
         if (items.checkedUrlList) {
-            items.checkedUrlList.forEach(url => {
-                checkedUrlList.push(url);
+            items.checkedUrlList.forEach(item => {
+                if(item.enabled) {
+                    checkedUrlList.push(item.url);
+                }               
             });
         }
-    })
+    })  
+}
+
+function removeFromMapIfItDependentTab(tabId) {
+    for (key in parentTabsMap) {
+        if(parentTabsMap[key].childTabId == tabId) {
+            delete parentTabsMap[key];
+        }
+    } 
 }
 
 function onStartupHandler() {
     updateMaxNubmerOfOpenTabs();
+    updateNumberOfOpenTabs();
 }
 
-function onStorageChangedHandler() {
+function onStorageChangedHandler() {    
     updateMaxNubmerOfOpenTabs();
     updateChekedUrlsList();
 }
 
 function onTabCreatedHandler(tab) {
+    console.log(checkedUrlList);
     updateNumberOfOpenTabs();
     deleteIfLimitIsExceeded(tab.id);
     if (!tab.openerTabId) {
@@ -65,15 +77,14 @@ function onTabCreatedHandler(tab) {
 
 function onTabRemovedHandler(removedTabId) {
     updateNumberOfOpenTabs();
-    const deps = parentTabsMap[removedTabId];
-    if (deps) {
+    removeFromMapIfItDependentTab(removedTabId);   
+    if (parentTabsMap[removedTabId]) {
         chrome.tabs.remove(parentTabsMap[removedTabId].childTabId);
         delete parentTabsMap[removedTabId];
     }
 }
 
 function onCreatedNavigationTargetHandler(details) {
-    console.log(details.url);
     if (checkedUrlList.indexOf(details.url) !== -1) {
         const deps = parentTabsMap[details.sourceTabId];
         if (deps) {
@@ -90,8 +101,10 @@ function onCreatedNavigationTargetHandler(details) {
 }
 
 function init() {
+    updateMaxNubmerOfOpenTabs();
     updateNumberOfOpenTabs();
     updateChekedUrlsList();
+    console.log(checkedUrlList);
     chrome.runtime.onStartup.addListener(onStartupHandler);
     chrome.tabs.onCreated.addListener(onTabCreatedHandler);
     chrome.tabs.onRemoved.addListener(onTabRemovedHandler);
